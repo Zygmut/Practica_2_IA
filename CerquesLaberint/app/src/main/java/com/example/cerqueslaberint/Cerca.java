@@ -1,6 +1,6 @@
 package com.example.cerqueslaberint;
-
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 
 /**
@@ -44,11 +44,55 @@ public class Cerca
         laberint = l;
     }
 
+    /*
+     * Printea un NODO
+     * !! LA X ES LA ALTURA !!
+     */
+    public String print_punt(Punt punto){
+        return "Punto\tx:" + punto.x + "\ty:" + punto.y;
+    }
+    /*
+     * Dado un nodo, retorna la cantidad de nodos a los que podemos ir siguiendo un orden
+     */
+    public Punt[] expand_node(Punt node){
+        ArrayList<Punt> expansion = new ArrayList<>();
+        System.out.println(print_punt(node));
+        int[] orden = {laberint.ESQUERRA, laberint.AMUNT, laberint.DRETA, laberint.AVALL};
+        for (int i = 0; i < orden.length; i++){
+            System.out.println(orden[i]);
+            if (laberint.pucAnar(node.y, node.x, orden[i])){
+                switch (orden[i]){
+                    // No se que es este "val" pero nunca se usa
+                    case Laberint.ESQUERRA:
+                        System.out.println("puedo ir a la izquierda");
+                        expansion.add(new Punt(node.x, node.y-1, node, 0));
+                        break;
+                    case Laberint.AMUNT:
+                        System.out.println("puedo ir arriba");
+                        expansion.add(new Punt(node.x-1, node.y, node, 0));
+                        break;
+                    case Laberint.DRETA:
+                        System.out.println("puedo ir a la derecha");
+                        expansion.add(new Punt(node.x, node.y+1, node, 0));
+                        break;
+                    case Laberint.AVALL:
+                        System.out.println("puedo ir abajo");
+                        expansion.add(new Punt(node.x+1, node.y, node, 0));
+                        break;
+                    default:
+                        return null;
+                }
+            }
+        }
+
+        return expansion.toArray(new Punt[expansion.size()]);
+
+    }
     public Cami CercaEnAmplada(Punt origen, Punt desti)
     {
         Cami camiTrobat = new Cami(files*columnes);
         laberint.setNodes(0);
-
+        System.out.println(Arrays.toString(expand_node(origen)));
         // Implementa l'algoritme aquí
         camiTrobat.afegeix(desti);
         return camiTrobat;
