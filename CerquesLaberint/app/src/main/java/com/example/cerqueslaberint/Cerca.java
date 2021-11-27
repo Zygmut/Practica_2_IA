@@ -51,6 +51,7 @@ public class Cerca
     public String print_punt(Punt punto){
         return "Punto\tx:" + punto.x + "\ty:" + punto.y;
     }
+
     /*
      * Dado un nodo, retorna la cantidad de nodos a los que podemos ir siguiendo un orden
      */
@@ -59,8 +60,8 @@ public class Cerca
         System.out.println(print_punt(node));
         int[] orden = {laberint.ESQUERRA, laberint.AMUNT, laberint.DRETA, laberint.AVALL};
         for (int i = 0; i < orden.length; i++){
-            System.out.println(orden[i]);
-            if (laberint.pucAnar(node.y, node.x, orden[i])){
+
+            if (laberint.pucAnar(node.x, node.y, orden[i])){
                 switch (orden[i]){
                     // No se que es este "val" pero nunca se usa
                     case Laberint.ESQUERRA:
@@ -92,7 +93,10 @@ public class Cerca
     {
         Cami camiTrobat = new Cami(files*columnes);
         laberint.setNodes(0);
-        System.out.println(Arrays.toString(expand_node(origen)));
+        Punt[] expansion = expand_node(origen);
+        for (int i = 0; i < expansion.length; i++){
+            System.out.println(print_punt(expansion[i]));
+        }
         // Implementa l'algoritme aquí
         camiTrobat.afegeix(desti);
         return camiTrobat;
