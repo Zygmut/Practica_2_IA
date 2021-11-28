@@ -43,8 +43,8 @@ public class Cerca {
         laberint = l;
     }
 
-    /*
-     * Printea un NODO
+    /**
+     * Printea un NODO. Cabe decir que el valor "x" es la altura, empezando desde la celda mas alta de la izquierda
      * @param punto Punto a printear
      * @return String con los contenidos pertinentes del punto
      */
@@ -52,12 +52,14 @@ public class Cerca {
         return "Punto\tx:" + punto.x + "\ty:" + punto.y;
     }
 
-    /*
-     * Añade los elementos del segundo no repetidos en el primer argumento
+    /**
+     * Devuelve la interesccion entre el primer parámetro y el segundo parámetro
      * @param target
      * @param toAdd
+     * @return La interesccion entre target y toAdd
      */
-    public void add_non_repeated(ArrayList<Punt> target, ArrayList<Punt> toAdd) {
+    public ArrayList<Punt> non_repeated(ArrayList<Punt> target, ArrayList<Punt> toAdd) {
+        ArrayList<Punt> non_repeated = new ArrayList<>();
         for (int i = 0; i < toAdd.size(); i++) {
             boolean found = false;
             for (int j = 0; j < target.size(); j++) {
@@ -67,51 +69,24 @@ public class Cerca {
                 }
             }
             if (!found) {
-                target.add(toAdd.get(i));
+                non_repeated.add(toAdd.get(i));
             }
-
         }
+        return non_repeated;
     }
 
-    /*
-     * Añade los elementos no repetidos del segundo argumento al primer argumento
-     * @param target
-     * @param toAdd
-     */
-    public void add_non_repeated(Stack<Punt> target, ArrayList<Punt> toAdd, ArrayList<Punt> visited) {
-        ArrayList<Punt> swap_order = new ArrayList<>();
-
-
-        for (int i = 0; i < toAdd.size(); i++) {
-            boolean found = false;
-            for (int j = 0; j < visited.size(); j++) {
-                if (toAdd.get(i).equals(visited.get(j))) {
-                    found = true;
-                    break;
-                }
-            }
-            if (!found) {
-                swap_order.add(toAdd.get(i));
-            }
-        }
-
-        // Swap order to get prefered order upon pop
-        for (int i = swap_order.size()-1; i >= 0; i-- ){
-            target.push(swap_order.get(i));
-        }
-    }
-
-    /*
-     * Dado un nodo, retorna la cantidad de nodos a los que podemos ir siguiendo un orden
+    /**
+     * Dado un punto, retorna los puntos a los que podemos ir siguiendo un orden predeterminado
+     * @param node Punto de origen a expandir
+     * @return Conjunto de todos los nodos a los que se puede ir
      */
     public ArrayList<Punt> expand_node(Punt node) {
         ArrayList<Punt> expansion = new ArrayList<>();
-        int[] orden = {laberint.ESQUERRA, laberint.AMUNT, laberint.DRETA, laberint.AVALL};
+        int[] orden = {laberint.ESQUERRA, laberint.AMUNT, laberint.DRETA, laberint.AVALL}; // the order can be changed with this array
         for (int i = 0; i < orden.length; i++) {
 
             if (laberint.pucAnar(node.x, node.y, orden[i])) {
                 switch (orden[i]) {
-                    // No se que es este "val" pero nunca se usa
                     case Laberint.ESQUERRA:
                         //System.out.println("Puedo ir a la izquierda");
                         expansion.add(new Punt(node.x, node.y - 1, node, 0));
@@ -134,9 +109,14 @@ public class Cerca {
             }
         }
         return expansion;
-
     }
 
+    /**
+     * Implementación del algoritmo de busqueda de ampladitud (BFS)
+     * @param origen Punto inicial
+     * @param desti Punto final
+     * @return Camino a seguir para ir desde origen hasta destino
+     */
     public Cami CercaEnAmplada(Punt origen, Punt desti) {
         Cami camiTrobat = new Cami(files * columnes);
         laberint.setNodes(0);
@@ -157,19 +137,26 @@ public class Cerca {
                     camiTrobat.afegeix(node);
                 }
                 camiTrobat.afegeix(node); // First node
-
-
+                laberint.setNodes(closed.size()); // Set node count
                 return camiTrobat;
             }
-            add_non_repeated(open, expand_node(node));
+            open.addAll(non_repeated(open, expand_node(node)));
         }
-        return null;
+        // System.err.println("No hay ningun camino!");
+        return null; //Error
     }
 
+    /**
+     * Implementación del algoritmo de busqueda de profunidad (DFS)
+     * @param origen Punto inicial
+     * @param desti Punto final
+     * @return Camino a seguir para ir desde origen hasta destino
+     */
     public Cami CercaEnProfunditat(Punt origen, Punt desti) {
         Cami camiTrobat = new Cami(files * columnes);
         laberint.setNodes(0);
         ArrayList<Punt> closed = new ArrayList<>();
+        ArrayList<Punt> non_repeated = new ArrayList<>();
         Stack<Punt> open = new Stack<>();
 
         open.push(origen);
@@ -186,11 +173,18 @@ public class Cerca {
                 }
                 camiTrobat.afegeix(node); // First node
 
+                laberint.setNodes(closed.size()); // Set node count
                 return camiTrobat;
             }
-            add_non_repeated(open, expand_node(node), closed);
+            non_repeated = non_repeated(closed, expand_node(node));
+
+            // Swap order to get prefered order upon pop
+            for (int i = non_repeated.size()-1; i >= 0; i-- ){
+                open.push(non_repeated.get(i));
+            }
         }
-        return null;
+        // System.err.println("No hay ningun camino!");
+        return null; // Error
     }
 
     public Cami CercaAmbHeurística(Punt origen, Punt desti, int tipus) {   // Tipus pot ser MANHATTAN o EUCLIDIA
