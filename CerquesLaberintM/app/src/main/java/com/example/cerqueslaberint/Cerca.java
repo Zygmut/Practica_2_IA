@@ -43,6 +43,18 @@ public class Cerca {
         laberint = l;
     }
 
+
+    public void print(Punt punto) {
+        System.out.println("Punto\tx:" + punto.x + "\ty:" + punto.y);
+    }
+
+    /**
+     * Implementación de amplada
+     *
+     * @param origen Punt inicial
+     * @param desti Punt final
+     * @return
+     */
     public Cami CercaEnAmplada(Punt origen, Punt desti) {
         Coa oberts = new Coa();
         Coa tancats = new Coa();
@@ -57,92 +69,102 @@ public class Cerca {
         // Implementa l'algoritme aquí
         oberts.afegeix(current_punt);
 
+        //mientras no encontremos el Punt final..
         while (!fin) {
-            expansioAmplada(current_punt, oberts, tancats);
-            current_punt = (Punt) oberts.treu();
+            //estudiamos Punt actual
+            expansioAmplada(current_punt, oberts);
+            //colocamos Punt actual en Coa tancats
+            tancats.afegeix(oberts.treu());
 
+            //miramos si es el Punt final, sino, seguimos
+            current_punt = (Punt) oberts.consulta();
             if (current_punt.equals(desti)) {
                 fin = true;
             }
         }
 
-        revertirOrdre(current_punt, camiTrobat, oberts, tancats);
+        //primer Punt
+        camiTrobat.afegeix(current_punt);
+        while (current_punt.previ != null) {
+            current_punt = current_punt.previ;
+            camiTrobat.afegeix(current_punt);
+        }
+        //ultim Punt
+        camiTrobat.afegeix(current_punt);
+
         return camiTrobat;
     }
 
-    private void revertirOrdre(Punt current_punt, Cami solucio, Coa q1, Coa q2) {
+    /**
+     * Vacíamos la Coa en un arraylist para poder usar el método contains() y
+     * luego reestablecemos la Coa
+     *
+     * @param oberts Coa en la que revisamos si el Punt esta repetido
+     * @param current Punt a revisar si esta repetido
+     * @return
+     */
+    private boolean contains(Coa oberts, Punt current) {
+        boolean trobat;
+        ArrayList<Punt> list = new ArrayList<>();
 
-        buidar(q1);
-        buidar(q2);
-
-        pushTot(q1, current_punt);
-
-        while (!q1.buida()) {
-            laberint.incNodes();
-            solucio.afegeix(pop(q1, q2));
+        //vaciamos coa en list
+        while (!oberts.buida()) {
+            list.add((Punt) oberts.treu());
         }
 
+        //contiene oberts el nodo current?
+        trobat = list.contains(current);
 
+        //reestablecemos coa oberts
+        for (int i = 0; i < list.size(); i++) {
+            oberts.afegeix(list.get(i));
+        }
+
+        return trobat;
     }
 
-    private void buidar(Coa q) {
-        while (!q.buida()) {
-            q.treu();
+    /**
+     * Método que expande un Punt abriendo todos sus nodos y colocando los no repetidos
+     * en la coa de abiertos
+     *
+     * @param current_punt Punt que esta siendo estudiado(abriéndose)
+     * @param oberts       Coa donde se meterán los nodos nuevos no repetidos
+     */
+    private void expansioAmplada(Punt current_punt, Coa oberts) {
+
+        //puc anar laberint.DIRECCIO?
+        if (laberint.pucAnar(current_punt.x, current_punt.y, Laberint.ESQUERRA)) {
+            Punt aux = new Punt(current_punt.x, current_punt.y - 1, current_punt, 0);
+            print(aux);
+            //Nodo repetido?
+            if (!contains(oberts, aux)) {
+                oberts.afegeix(aux);
+            }
         }
-    }
-
-    private void pushTot(Coa q, Punt current_punt) {
-        while (current_punt != null) {
-            q.afegeix(current_punt);
-            current_punt = current_punt.previ;
+        if (laberint.pucAnar(current_punt.x, current_punt.y, Laberint.AMUNT)) {
+            Punt aux = new Punt(current_punt.x - 1, current_punt.y, current_punt, 0);
+            print(aux);
+            //Nodo repetido?
+            if (!contains(oberts, aux)) {
+                oberts.afegeix(aux);
+            }
         }
-    }
-
-    private Punt pop(Coa q1, Coa q2) {
-        while (q1.elements() > 1) {
-            q2.afegeix(q1.treu());
+        if (laberint.pucAnar(current_punt.x, current_punt.y, Laberint.DRETA)) {
+            Punt aux = new Punt(current_punt.x, current_punt.y + 1, current_punt, 0);
+            print(aux);
+            //Nodo repetido?
+            if (!contains(oberts, aux)) {
+                oberts.afegeix(aux);
+            }
         }
-        Punt primer_pila = (Punt) q1.treu();
-
-        q1 = q2;
-        buidar(q2);
-
-        return primer_pila;
-    }
-
-    private void expansioAmplada(Punt current_punt, Coa oberts, Coa tancats) {
-        Punt aux;
-
-        if (laberint.pucAnar(current_punt.x, current_punt.y, laberint.AVALL)) {
-            aux = current_punt;
-            aux.previ = current_punt;
-            aux.x = aux.x + 1;
-            oberts.afegeix(aux);
-
+        if (laberint.pucAnar(current_punt.x, current_punt.y, Laberint.AVALL)) {
+            Punt aux = new Punt(current_punt.x + 1, current_punt.y, current_punt, 0);
+            print(aux);
+            //Nodo repetido?
+            if (!contains(oberts, aux)) {
+                oberts.afegeix(aux);
+            }
         }
-        if (laberint.pucAnar(current_punt.x, current_punt.y, laberint.DRETA)) {
-            aux = current_punt;
-            aux.previ = current_punt;
-            aux.y = aux.y + 1;
-            oberts.afegeix(aux);
-
-        }
-        if (laberint.pucAnar(current_punt.x, current_punt.y, laberint.AMUNT)) {
-            aux = current_punt;
-            aux.previ = current_punt;
-            aux.x = aux.x - 1;
-            oberts.afegeix(aux);
-
-        }
-        if (laberint.pucAnar(current_punt.x, current_punt.y, laberint.ESQUERRA)) {
-            aux = current_punt;
-            aux.previ = current_punt;
-            aux.y = aux.y - 1;
-            oberts.afegeix(aux);
-
-        }
-
-        tancats.afegeix(oberts.treu());
     }
 
     public Cami CercaEnProfunditat(Punt origen, Punt desti) {
