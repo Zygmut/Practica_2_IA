@@ -156,7 +156,7 @@ public class Cerca {
         Cami camiTrobat = new Cami(files * columnes);
         laberint.setNodes(0);
         ArrayList<Punt> closed = new ArrayList<>();
-        ArrayList<Punt> non_repeated = new ArrayList<>();
+        ArrayList<Punt> non_repeated;
         Stack<Punt> open = new Stack<>();
 
         open.push(origen);
