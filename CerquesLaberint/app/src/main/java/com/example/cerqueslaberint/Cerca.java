@@ -1,8 +1,6 @@
 package com.example.cerqueslaberint;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.Stack;
 
 /**
@@ -47,22 +45,23 @@ public class Cerca {
 
     /*
      * Printea un NODO
-     * !! LA X ES LA ALTURA !!
+     * @param punto Punto a printear
+     * @return String con los contenidos pertinentes del punto
      */
     public String print_punt(Punt punto) {
         return "Punto\tx:" + punto.x + "\ty:" + punto.y;
     }
 
     /*
-     * Añade al primer arraylist todos los elementos del segundo, evitando nodos repetidos
+     * Añade los elementos del segundo no repetidos en el primer argumento
+     * @param target
+     * @param toAdd
      */
     public void add_non_repeated(ArrayList<Punt> target, ArrayList<Punt> toAdd) {
         for (int i = 0; i < toAdd.size(); i++) {
             boolean found = false;
             for (int j = 0; j < target.size(); j++) {
-                //System.out.println(print_punt(toAdd.get(i)) + "\t" + print_punt(target.get(j)));
                 if (toAdd.get(i).equals(target.get(j))) {
-                    //System.out.println("Found equal!");
                     found = true;
                     break;
                 }
@@ -75,19 +74,18 @@ public class Cerca {
     }
 
     /*
-     * Añade al Stack todos los elementos del ArrayList, evitando nodos repetidos
+     * Añade los elementos no repetidos del segundo argumento al primer argumento
+     * @param target
+     * @param toAdd
      */
-    public void add_non_repeated(Stack<Punt> target, ArrayList<Punt> toAdd) {
-        ArrayList<Punt> arr_target = new ArrayList<>();
+    public void add_non_repeated(Stack<Punt> target, ArrayList<Punt> toAdd, ArrayList<Punt> visited) {
         ArrayList<Punt> swap_order = new ArrayList<>();
-        arr_target.addAll(target);
+
 
         for (int i = 0; i < toAdd.size(); i++) {
             boolean found = false;
-            for (int j = 0; j < arr_target.size(); j++) {
-                //System.out.println(print_punt(toAdd.get(i)) + "\t" + print_punt(target.get(j)));
-                if (toAdd.get(i).equals(arr_target.get(j))) {
-                    //System.out.println("Found equal!");
+            for (int j = 0; j < visited.size(); j++) {
+                if (toAdd.get(i).equals(visited.get(j))) {
                     found = true;
                     break;
                 }
@@ -136,7 +134,6 @@ public class Cerca {
             }
         }
         return expansion;
-        //return expansion.toArray(new Punt[expansion.size()]);
 
     }
 
@@ -165,7 +162,6 @@ public class Cerca {
                 return camiTrobat;
             }
             add_non_repeated(open, expand_node(node));
-            // open.addAll(expand_node(node));
         }
         return null;
     }
@@ -190,11 +186,9 @@ public class Cerca {
                 }
                 camiTrobat.afegeix(node); // First node
 
-
                 return camiTrobat;
             }
-            add_non_repeated(open, expand_node(node));
-            // open.addAll(expand_node(node));
+            add_non_repeated(open, expand_node(node), closed);
         }
         return null;
     }
