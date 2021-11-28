@@ -2,7 +2,7 @@ package com.example.cerqueslaberint;
 
 import java.util.ArrayList;
 import java.util.Collections;
-
+import java.util.Stack;
 /**
  * Created by Ramon Mas on 10/10/21.
  * Classe que conté els diferents algorismes de cerca que s'han d'implementar
@@ -52,7 +52,7 @@ public class Cerca {
      * Implementación de amplada
      *
      * @param origen Punt inicial
-     * @param desti Punt final
+     * @param desti  Punt final
      * @return
      */
     public Cami CercaEnAmplada(Punt origen, Punt desti) {
@@ -72,7 +72,7 @@ public class Cerca {
         //mientras no encontremos el Punt final..
         while (!fin) {
             //estudiamos Punt actual
-            expansioAmplada(current_punt, oberts);
+            expansioAmplada(current_punt, oberts, tancats);
             //colocamos Punt actual en Coa tancats
             tancats.afegeix(oberts.treu());
 
@@ -92,6 +92,8 @@ public class Cerca {
         //ultim Punt
         camiTrobat.afegeix(current_punt);
 
+        laberint.setNodes(tancats.elements());
+
         return camiTrobat;
     }
 
@@ -99,7 +101,7 @@ public class Cerca {
      * Vacíamos la Coa en un arraylist para poder usar el método contains() y
      * luego reestablecemos la Coa
      *
-     * @param oberts Coa en la que revisamos si el Punt esta repetido
+     * @param oberts  Coa en la que revisamos si el Punt esta repetido
      * @param current Punt a revisar si esta repetido
      * @return
      */
@@ -129,15 +131,16 @@ public class Cerca {
      *
      * @param current_punt Punt que esta siendo estudiado(abriéndose)
      * @param oberts       Coa donde se meterán los nodos nuevos no repetidos
+     * @param tancats      Coa para controlar repetidos
      */
-    private void expansioAmplada(Punt current_punt, Coa oberts) {
+    private void expansioAmplada(Punt current_punt, Coa oberts, Coa tancats) {
 
         //puc anar laberint.DIRECCIO?
         if (laberint.pucAnar(current_punt.x, current_punt.y, Laberint.ESQUERRA)) {
             Punt aux = new Punt(current_punt.x, current_punt.y - 1, current_punt, 0);
             print(aux);
             //Nodo repetido?
-            if (!contains(oberts, aux)) {
+            if (!contains(oberts, aux) && !contains(tancats, aux)) {
                 oberts.afegeix(aux);
             }
         }
@@ -145,7 +148,7 @@ public class Cerca {
             Punt aux = new Punt(current_punt.x - 1, current_punt.y, current_punt, 0);
             print(aux);
             //Nodo repetido?
-            if (!contains(oberts, aux)) {
+            if (!contains(oberts, aux) && !contains(tancats, aux)) {
                 oberts.afegeix(aux);
             }
         }
@@ -153,7 +156,7 @@ public class Cerca {
             Punt aux = new Punt(current_punt.x, current_punt.y + 1, current_punt, 0);
             print(aux);
             //Nodo repetido?
-            if (!contains(oberts, aux)) {
+            if (!contains(oberts, aux) && !contains(tancats, aux)) {
                 oberts.afegeix(aux);
             }
         }
@@ -161,19 +164,94 @@ public class Cerca {
             Punt aux = new Punt(current_punt.x + 1, current_punt.y, current_punt, 0);
             print(aux);
             //Nodo repetido?
-            if (!contains(oberts, aux)) {
+            if (!contains(oberts, aux) && !contains(tancats, aux)) {
                 oberts.afegeix(aux);
             }
         }
     }
 
+    /**
+     * Método que expande un Punt abriendo todos sus nodos y colocando los no repetidos
+     * en la Pila de abiertos
+     *
+     * @param current_punt Punt que esta siendo estudiado(abriéndose)
+     * @param oberts       Pila donde se meterán los nodos nuevos no repetidos
+     * @param tancats      Coa para controlar repetidos
+     */
+    private void expansioProfundidad(Punt current_punt, Stack oberts, Coa tancats) {
+
+        //puc anar laberint.DIRECCIO?
+        if (laberint.pucAnar(current_punt.x, current_punt.y, Laberint.ESQUERRA)) {
+            Punt aux = new Punt(current_punt.x, current_punt.y - 1, current_punt, 0);
+            print(aux);
+            //Nodo repetido?
+            if (!oberts.contains(aux) && !contains(tancats, aux)) {
+                oberts.push(aux);
+            }
+        }
+        if (laberint.pucAnar(current_punt.x, current_punt.y, Laberint.AMUNT)) {
+            Punt aux = new Punt(current_punt.x - 1, current_punt.y, current_punt, 0);
+            print(aux);
+            //Nodo repetido?
+            if (!oberts.contains(aux) && !contains(tancats, aux)) {
+                oberts.push(aux);
+            }
+        }
+        if (laberint.pucAnar(current_punt.x, current_punt.y, Laberint.DRETA)) {
+            Punt aux = new Punt(current_punt.x, current_punt.y + 1, current_punt, 0);
+            print(aux);
+            //Nodo repetido?
+            if (!oberts.contains(aux) && !contains(tancats, aux)) {
+                oberts.push(aux);
+            }
+        }
+        if (laberint.pucAnar(current_punt.x, current_punt.y, Laberint.AVALL)) {
+            Punt aux = new Punt(current_punt.x + 1, current_punt.y, current_punt, 0);
+            print(aux);
+            //Nodo repetido?
+            if (!oberts.contains(aux) && !contains(tancats, aux)) {
+                oberts.push(aux);
+            }
+        }
+    }
+
     public Cami CercaEnProfunditat(Punt origen, Punt desti) {
+        Stack<Punt> oberts = new Stack<>();
+        Coa tancats = new Coa();
+        boolean fin = false;
+        Punt current_punt = origen;
+
         Cami camiTrobat = new Cami(files * columnes);
         laberint.setNodes(0);
 
         // Implementa l'algoritme aquí
-        camiTrobat.afegeix(desti);
 
+        oberts.push(current_punt);
+
+        while (!fin) {
+            //Punto a tratar
+            current_punt = oberts.pop();
+            //expandimos, mirando que no este repetido
+            expansioProfundidad(current_punt, oberts, tancats);
+            //colocamos en lista de cerrados
+            tancats.afegeix(current_punt);
+
+            //es el nodo desti?
+            if (current_punt.equals(desti)) {
+                fin = true;
+            }
+
+        }
+
+        //primer Punt
+        camiTrobat.afegeix(current_punt);
+        while (current_punt.previ != null) {
+            current_punt = current_punt.previ;
+            camiTrobat.afegeix(current_punt);
+        }
+        //ultim Punt
+        camiTrobat.afegeix(current_punt);
+        laberint.setNodes(tancats.elements());
         return camiTrobat;
     }
 
