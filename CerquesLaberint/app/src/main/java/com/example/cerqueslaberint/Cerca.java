@@ -50,8 +50,21 @@ public class Cerca {
      * @param punto Punto a printear
      * @return String con los contenidos pertinentes del punto
      */
-    public String print_punt(Punt punto) {
+    private String print_punt(Punt punto) {
         return "Punto\tx:" + punto.x + "\ty:" + punto.y;
+    }
+
+    /**
+     * Invierte el Cami pasado por parámetro. Princio -> Final & Final -> Principio
+     * @param input Camino a invertir
+     * @return Camino invertido
+     */
+    private Cami invert_path(Cami input){
+        Cami inverted_path = new Cami(files*columnes);
+        for (int i = input.longitud-1; i >= 0; i--){
+            inverted_path.afegeix(input.cami[i]);
+        }
+        return inverted_path;
     }
 
     /**
@@ -60,12 +73,17 @@ public class Cerca {
      * @param toAdd Camino a concantenar
      * @return Camino concatenado
      */
-    public Cami concat_paths(Cami target, Cami toAdd){
+    private Cami concat_paths(Cami target, Cami toAdd){
         Cami return_path = new Cami(files * columnes);
+
         for (int i = 0; i < target.longitud; i++){
             return_path.afegeix(target.cami[i]);
         }
-        for (int i = 0; i < toAdd.longitud-1; i++){ // Skip first node desti = origen
+        if (target.longitud == 0){ // first iteration
+            return_path.afegeix(toAdd.cami[toAdd.longitud-1]);
+        }
+
+        for (int i = toAdd.longitud-2; i >= 0 ; i--){ // Skip first node desti = origen
             return_path.afegeix(toAdd.cami[i]);
         }
         return return_path;
@@ -154,7 +172,7 @@ public class Cerca {
                     node = node.previ;
                     camiTrobat.afegeix(node);
                 }
-                camiTrobat.afegeix(node); // First node
+
                 laberint.setNodes(closed.size()); // Set node count
                 return camiTrobat;
             }
@@ -189,7 +207,6 @@ public class Cerca {
                     node = node.previ;
                     camiTrobat.afegeix(node);
                 }
-                camiTrobat.afegeix(node); // First node
 
                 laberint.setNodes(closed.size()); // Set node count
                 return camiTrobat;
@@ -252,10 +269,10 @@ public class Cerca {
                 temp_path = CercaEnAmplada(from, laberint.getObjecte(i));
                 laberint.setNodes(nodes + laberint.nodes);
 
-                if ((path.longitud + (temp_path.longitud-1)) < min){
+                if ((path.longitud + (temp_path.longitud-1)) < current_min){
                     recur = TSM_recursive(laberint.getObjecte(i), to, concat_paths(path, temp_path), city, current_min, temp_visited);
 
-                    if (recur.longitud < min){
+                    if (recur.longitud < current_min){
                         current_min = path.longitud;
                         exit = recur;
                     }
@@ -289,6 +306,6 @@ public class Cerca {
             visited.add(false);
         }
 
-        return TSM_recursive(origen, desti, camiTrobat, city.size(), Integer.MAX_VALUE, visited);
+        return invert_path(TSM_recursive(origen, desti, camiTrobat, city.size(), Integer.MAX_VALUE, visited));
     }
 }
