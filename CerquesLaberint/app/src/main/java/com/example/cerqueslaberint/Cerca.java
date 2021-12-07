@@ -249,7 +249,7 @@ public class Cerca {
         Cami temp_path;
         int current_min = min;
         Cami recur;
-        Cami exit = new Cami(files * columnes);
+        Cami exit = new Cami(files * columnes*2); // Necesitamos mucho mas espacio de "buffer"
         ArrayList<Boolean> temp_visited;
         int nodes = laberint.nodes;
 
@@ -272,8 +272,8 @@ public class Cerca {
                 if ((path.longitud + (temp_path.longitud-1)) < current_min){
                     recur = TSM_recursive(laberint.getObjecte(i), to, concat_paths(path, temp_path), city, current_min, temp_visited);
 
-                    if (recur.longitud < current_min){
-                        current_min = path.longitud;
+                    if ((recur.longitud < current_min) && (recur.longitud != 0)){
+                        current_min = recur.longitud;
                         exit = recur;
                     }
                 }
