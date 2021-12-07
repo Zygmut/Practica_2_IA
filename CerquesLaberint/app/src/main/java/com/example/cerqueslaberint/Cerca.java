@@ -249,7 +249,7 @@ public class Cerca {
         Cami temp_path;
         int current_min = min;
         Cami recur;
-        Cami exit = new Cami(files * columnes*2); // Necesitamos mucho mas espacio de "buffer"
+        Cami exit = new Cami(files * columnes); 
         ArrayList<Boolean> temp_visited;
         int nodes = laberint.nodes;
 
