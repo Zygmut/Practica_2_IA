@@ -240,16 +240,15 @@ public class Cerca {
      * @param from
      * @param to
      * @param path
-     * @param city
      * @param min
      * @param visited
      * @return Camino de menor longitud entre todos las "ciudades" y la salida
      */
-    public Cami TSM_recursive(Punt from, Punt to, Cami path, int city, int min, ArrayList<Boolean> visited){
+    public Cami TSM_recursive(Punt from, Punt to, Cami path, int min, ArrayList<Boolean> visited){
         Cami temp_path;
         int current_min = min;
         Cami recur;
-        Cami exit = new Cami(files * columnes); 
+        Cami exit = new Cami(files * columnes);
         ArrayList<Boolean> temp_visited;
         int nodes = laberint.nodes;
 
@@ -259,7 +258,7 @@ public class Cerca {
             return concat_paths(path, temp_path);
         }
 
-        for (int i = 0; i < city; i++){
+        for (int i = 0; i < visited.size(); i++){
             temp_visited = new ArrayList<>();
             temp_visited.addAll(visited); // reset of visited values
             nodes = laberint.nodes; // reset value of nodes
@@ -270,7 +269,7 @@ public class Cerca {
                 laberint.setNodes(nodes + laberint.nodes);
 
                 if ((path.longitud + (temp_path.longitud-1)) < current_min){
-                    recur = TSM_recursive(laberint.getObjecte(i), to, concat_paths(path, temp_path), city, current_min, temp_visited);
+                    recur = TSM_recursive(laberint.getObjecte(i), to, concat_paths(path, temp_path), current_min, temp_visited);
 
                     if ((recur.longitud < current_min) && (recur.longitud != 0)){
                         current_min = recur.longitud;
@@ -306,6 +305,6 @@ public class Cerca {
             visited.add(false);
         }
 
-        return invert_path(TSM_recursive(origen, desti, camiTrobat, city.size(), Integer.MAX_VALUE, visited));
+        return invert_path(TSM_recursive(origen, desti, camiTrobat, Integer.MAX_VALUE, visited));
     }
 }
