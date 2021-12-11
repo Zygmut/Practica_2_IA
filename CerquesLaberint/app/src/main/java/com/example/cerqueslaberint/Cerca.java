@@ -68,8 +68,8 @@ public class Cerca {
     }
 
     /**
-     * Añade todos los elementos del segundo parametro al primero. return = target U toAdd
-     * @param target
+     * Concatena el primer camino con el segundo. Tiene en cuenta que el nodo final y el inicial de los caminos serán iguales
+     * @param target Camino objetivo
      * @param toAdd Camino a concantenar
      * @return Camino concatenado
      */
@@ -89,10 +89,10 @@ public class Cerca {
         return return_path;
     }
     /**
-     * Devuelve la interesccion entre el primer parámetro y el segundo parámetro
-     * @param target
-     * @param toAdd
-     * @return La interesccion entre target y toAdd
+     * Devuelve un conjunto de datos del segundo parametro que no estan en el primer parametro  
+     * @param target Primer conjunto
+     * @param toAdd Segundo conjunto
+     * @return Conjunto de datos del segundo parametro que no estan en el primer parametro
      */
     public ArrayList<Punt> non_repeated(ArrayList<Punt> target, ArrayList<Punt> toAdd) {
         ArrayList<Punt> non_repeated = new ArrayList<>();
@@ -124,19 +124,15 @@ public class Cerca {
             if (laberint.pucAnar(node.x, node.y, orden[i])) {
                 switch (orden[i]) {
                     case Laberint.ESQUERRA:
-                        //System.out.println("Puedo ir a la izquierda");
                         expansion.add(new Punt(node.x, node.y - 1, node, 0));
                         break;
                     case Laberint.AMUNT:
-                        //System.out.println("Puedo ir a la arriba");
                         expansion.add(new Punt(node.x - 1, node.y, node, 0));
                         break;
                     case Laberint.DRETA:
-                        //System.out.println("Puedo ir a la derecha");
                         expansion.add(new Punt(node.x, node.y + 1, node, 0));
                         break;
                     case Laberint.AVALL:
-                        //System.out.println("Puedo ir a la abajo");
                         expansion.add(new Punt(node.x + 1, node.y, node, 0));
                         break;
                     default:
@@ -178,7 +174,6 @@ public class Cerca {
             }
             open.addAll(non_repeated(open, expand_node(node)));
         }
-        // System.err.println("No hay ningun camino!");
         return null; //Error
     }
 
@@ -218,7 +213,6 @@ public class Cerca {
                 open.push(non_repeated.get(i));
             }
         }
-        // System.err.println("No hay ningun camino!");
         return null; // Error
     }
 
@@ -237,11 +231,11 @@ public class Cerca {
      * Metodo que implemtenta el problema del mercader ambulante (TSM). Mediante llamadas recursivas
      * a la búsqueda por amplitud, este método retornará el camino más eficiente con respecto a
      * longitud.
-     * @param from
-     * @param to
-     * @param path
-     * @param min
-     * @param visited
+     * @param from Punto origen
+     * @param to Punto final
+     * @param path Camino parcial
+     * @param min Minimo actual
+     * @param visited Conjunto de "ciudades" visitadas
      * @return Camino de menor longitud entre todos las "ciudades" y la salida
      */
     public Cami TSM_recursive(Punt from, Punt to, Cami path, int min, ArrayList<Boolean> visited){
