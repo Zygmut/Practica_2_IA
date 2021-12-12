@@ -165,10 +165,11 @@ public class Laberint {
 
 
     public void initAmbNivell(int n, int f, int c)
+
     {
         nivell(n);
         creaNou(f, c);  // laberint de fxc
-        objectes = new Punt[] {new Punt(0,0), new Punt(nColumnes-1,0), new Punt(nColumnes-1, nFiles-1), new Punt(0, nFiles-1)};  // viatjant de comenrç, els bitxitos
+        objectes = new Punt[] {new Punt(0,0), new Punt(nFiles-1,0), new Punt(nFiles-1, nColumnes-1), new Punt(0, nColumnes-1)};  // viatjant de comerç, els bitxitos
         bitxo = null;
     }
 

@@ -1,7 +1,9 @@
 package com.example.cerqueslaberint;
+
+import android.content.pm.LauncherApps;
+
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
+import java.util.Stack;
 
 /**
  * Created by Ramon Mas on 10/10/21.
@@ -9,9 +11,9 @@ import java.util.Collections;
  */
 
 /**
- *   AUTORS:__________________________________________
+ * AUTORS:__________________________________________
  */
-/* S'ha d'omplenar la següent taula amb els diferents valors del nodes visitats i la llargada del camí 
+/* S'ha d'omplenar la següent taula amb els diferents valors del nodes visitats i la llargada del camí
  * per les diferents grandàries de laberints proposades i comentar breument els resultats obtinguts.
  ****************************************************************************************************************
  *                  Profunditat           Amplada          Manhattan         Euclidiana         Viatjant        *
@@ -30,10 +32,9 @@ import java.util.Collections;
  *
  */
 
-public class Cerca
-{
+public class Cerca {
     static final public int MANHATTAN = 2;
-    static final public int EUCLIDEA  = 3;
+    static final public int EUCLIDEA = 3;
 
     Laberint laberint;      // laberint on es cerca
     int files, columnes;    // files i columnes del laberint
@@ -44,79 +45,180 @@ public class Cerca
         laberint = l;
     }
 
-    /*
-     * Printea un NODO
-     * !! LA X ES LA ALTURA !!
+    /**
+     * Printea un NODO. Cabe decir que el valor "x" es la altura, empezando desde la celda mas alta de la izquierda
+     * @param punto Punto a printear
+     * @return String con los contenidos pertinentes del punto
      */
-    public String print_punt(Punt punto){
+    private String print_punt(Punt punto) {
         return "Punto\tx:" + punto.x + "\ty:" + punto.y;
     }
 
-    /*
-     * Dado un nodo, retorna la cantidad de nodos a los que podemos ir siguiendo un orden
+    /**
+     * Invierte el Cami pasado por parámetro. Princio -> Final & Final -> Principio
+     * @param input Camino a invertir
+     * @return Camino invertido
      */
-    public Punt[] expand_node(Punt node){
-        ArrayList<Punt> expansion = new ArrayList<>();
-        System.out.println(print_punt(node));
-        int[] orden = {laberint.ESQUERRA, laberint.AMUNT, laberint.DRETA, laberint.AVALL};
-        for (int i = 0; i < orden.length; i++){
+    private Cami invert_path(Cami input){
+        Cami inverted_path = new Cami(files*columnes);
+        for (int i = input.longitud-1; i >= 0; i--){
+            inverted_path.afegeix(input.cami[i]);
+        }
+        return inverted_path;
+    }
 
-            if (laberint.pucAnar(node.x, node.y, orden[i])){
-                switch (orden[i]){
-                    // No se que es este "val" pero nunca se usa
+    /**
+     * Concatena el primer camino con el segundo. Tiene en cuenta que el nodo final y el inicial de los caminos serán iguales
+     * @param target Camino objetivo
+     * @param toAdd Camino a concantenar
+     * @return Camino concatenado
+     */
+    private Cami concat_paths(Cami target, Cami toAdd){
+        Cami return_path = new Cami(files * columnes);
+
+        for (int i = 0; i < target.longitud; i++){
+            return_path.afegeix(target.cami[i]);
+        }
+        if (target.longitud == 0){ // first iteration
+            return_path.afegeix(toAdd.cami[toAdd.longitud-1]);
+        }
+
+        for (int i = toAdd.longitud-2; i >= 0 ; i--){ // Skip first node desti = origen
+            return_path.afegeix(toAdd.cami[i]);
+        }
+        return return_path;
+    }
+    /**
+     * Devuelve un conjunto de datos del segundo parametro que no estan en el primer parametro  
+     * @param target Primer conjunto
+     * @param toAdd Segundo conjunto
+     * @return Conjunto de datos del segundo parametro que no estan en el primer parametro
+     */
+    public ArrayList<Punt> non_repeated(ArrayList<Punt> target, ArrayList<Punt> toAdd) {
+        ArrayList<Punt> non_repeated = new ArrayList<>();
+        for (int i = 0; i < toAdd.size(); i++) {
+            boolean found = false;
+            for (int j = 0; j < target.size(); j++) {
+                if (toAdd.get(i).equals(target.get(j))) {
+                    found = true;
+                    break;
+                }
+            }
+            if (!found) {
+                non_repeated.add(toAdd.get(i));
+            }
+        }
+        return non_repeated;
+    }
+
+    /**
+     * Dado un punto, retorna los puntos a los que podemos ir siguiendo un orden predeterminado
+     * @param node Punto de origen a expandir
+     * @return Conjunto de todos los nodos a los que se puede ir
+     */
+    public ArrayList<Punt> expand_node(Punt node) {
+        ArrayList<Punt> expansion = new ArrayList<>();
+        int[] orden = {laberint.ESQUERRA, laberint.AMUNT, laberint.DRETA, laberint.AVALL}; // the order can be changed with this array
+        for (int i = 0; i < orden.length; i++) {
+
+            if (laberint.pucAnar(node.x, node.y, orden[i])) {
+                switch (orden[i]) {
                     case Laberint.ESQUERRA:
-                        System.out.println("puedo ir a la izquierda");
-                        expansion.add(new Punt(node.x, node.y-1, node, 0));
+                        expansion.add(new Punt(node.x, node.y - 1, node, 0));
                         break;
                     case Laberint.AMUNT:
-                        System.out.println("puedo ir arriba");
-                        expansion.add(new Punt(node.x-1, node.y, node, 0));
+                        expansion.add(new Punt(node.x - 1, node.y, node, 0));
                         break;
                     case Laberint.DRETA:
-                        System.out.println("puedo ir a la derecha");
-                        expansion.add(new Punt(node.x, node.y+1, node, 0));
+                        expansion.add(new Punt(node.x, node.y + 1, node, 0));
                         break;
                     case Laberint.AVALL:
-                        System.out.println("puedo ir abajo");
-                        expansion.add(new Punt(node.x+1, node.y, node, 0));
+                        expansion.add(new Punt(node.x + 1, node.y, node, 0));
                         break;
                     default:
                         return null;
                 }
             }
         }
-
-        return expansion.toArray(new Punt[expansion.size()]);
-
+        return expansion;
     }
-    public Cami CercaEnAmplada(Punt origen, Punt desti)
-    {
-        Cami camiTrobat = new Cami(files*columnes);
+
+    /**
+     * Implementación del algoritmo de busqueda de ampladitud (BFS)
+     * @param origen Punto inicial
+     * @param desti Punto final
+     * @return Camino a seguir para ir desde origen hasta destino
+     */
+    public Cami CercaEnAmplada(Punt origen, Punt desti) {
+        Cami camiTrobat = new Cami(files * columnes);
         laberint.setNodes(0);
-        Punt[] expansion = expand_node(origen);
-        for (int i = 0; i < expansion.length; i++){
-            System.out.println(print_punt(expansion[i]));
+        ArrayList<Punt> closed = new ArrayList<>();
+        ArrayList<Punt> open = new ArrayList<>();
+
+        open.add(origen);
+
+        while (open.size() != 0) {
+            Punt node = open.get(0);
+            open.remove(0);
+            closed.add(node);
+            if (node.equals(desti)) {
+
+                camiTrobat.afegeix(node); // Final node
+                while (node.previ != null) { // All other nodes
+                    node = node.previ;
+                    camiTrobat.afegeix(node);
+                }
+
+                laberint.setNodes(closed.size()); // Set node count
+                return camiTrobat;
+            }
+            open.addAll(non_repeated(open, expand_node(node)));
         }
-        // Implementa l'algoritme aquí
-        camiTrobat.afegeix(desti);
-        return camiTrobat;
+        return null; //Error
     }
 
-    public Cami CercaEnProfunditat(Punt origen, Punt desti)
-    {
-        Cami camiTrobat = new Cami(files*columnes);
+    /**
+     * Implementación del algoritmo de busqueda de profunidad (DFS)
+     * @param origen Punto inicial
+     * @param desti Punto final
+     * @return Camino a seguir para ir desde origen hasta destino
+     */
+    public Cami CercaEnProfunditat(Punt origen, Punt desti) {
+        Cami camiTrobat = new Cami(files * columnes);
         laberint.setNodes(0);
+        ArrayList<Punt> closed = new ArrayList<>();
+        ArrayList<Punt> non_repeated;
+        Stack<Punt> open = new Stack<>();
 
-        // Implementa l'algoritme aquí
-        camiTrobat.afegeix(desti);
+        open.push(origen);
 
-        return camiTrobat;
+        while (!open.empty()) {
+            Punt node = open.pop();
+            closed.add(node);
+            if (node.equals(desti)) {
+
+                camiTrobat.afegeix(node); // Final node
+                while (node.previ != null) { // All other nodes
+                    node = node.previ;
+                    camiTrobat.afegeix(node);
+                }
+
+                laberint.setNodes(closed.size()); // Set node count
+                return camiTrobat;
+            }
+            non_repeated = non_repeated(closed, expand_node(node));
+
+            // Swap order to get prefered order upon pop
+            for (int i = non_repeated.size()-1; i >= 0; i-- ){
+                open.push(non_repeated.get(i));
+            }
+        }
+        return null; // Error
     }
 
-    public Cami CercaAmbHeurística(Punt origen, Punt desti, int tipus)
-    {   // Tipus pot ser MANHATTAN o EUCLIDIA
+    public Cami CercaAmbHeurística(Punt origen, Punt desti, int tipus) {   // Tipus pot ser MANHATTAN o EUCLIDIA
         int i;
-        Cami camiTrobat = new Cami(files*columnes);
+        Cami camiTrobat = new Cami(files * columnes);
         laberint.setNodes(0);
 
         // Implementa l'algoritme aquí
@@ -125,15 +227,78 @@ public class Cerca
         return camiTrobat;
     }
 
+    /**
+     * Metodo que implemtenta el problema del mercader ambulante (TSM). Mediante llamadas recursivas
+     * a la búsqueda por amplitud, este método retornará el camino más eficiente con respecto a
+     * longitud.
+     * @param from Punto origen
+     * @param to Punto final
+     * @param path Camino parcial
+     * @param min Minimo actual
+     * @param visited Conjunto de "ciudades" visitadas
+     * @return Camino de menor longitud entre todos las "ciudades" y la salida
+     */
+    public Cami TSM_recursive(Punt from, Punt to, Cami path, int min, ArrayList<Boolean> visited){
+        Cami temp_path;
+        int current_min = min;
+        Cami recur;
+        Cami exit = new Cami(files * columnes);
+        ArrayList<Boolean> temp_visited;
+        int nodes = laberint.nodes;
 
-    public Cami CercaViatjant(Punt origen, Punt desti)
-    {
-        Cami camiTrobat = new Cami(files*columnes);
+        if (!visited.contains(false)){ // All visited
+            temp_path = CercaEnAmplada(from, to);
+            laberint.setNodes(nodes + laberint.nodes);
+            return concat_paths(path, temp_path);
+        }
+
+        for (int i = 0; i < visited.size(); i++){
+            temp_visited = new ArrayList<>();
+            temp_visited.addAll(visited); // reset of visited values
+            nodes = laberint.nodes; // reset value of nodes
+
+            if (!temp_visited.get(i)){
+                temp_visited.set(i, true); // Count as visited
+                temp_path = CercaEnAmplada(from, laberint.getObjecte(i));
+                laberint.setNodes(nodes + laberint.nodes);
+
+                if ((path.longitud + (temp_path.longitud-1)) < current_min){
+                    recur = TSM_recursive(laberint.getObjecte(i), to, concat_paths(path, temp_path), current_min, temp_visited);
+
+                    if ((recur.longitud < current_min) && (recur.longitud != 0)){
+                        current_min = recur.longitud;
+                        exit = recur;
+                    }
+                }
+            }
+        }
+
+        return exit;
+    }
+    /**
+     * Implementación del algoritmo del mercader mediante el algoritmo de busqueda de amplitud (BFS)
+     * @param origen Punto inicial
+     * @param desti Punto final
+     * @return Camino a seguir para ir desde origen hasta destino
+     */
+    public Cami CercaViatjant(Punt origen, Punt desti) {
+        Cami camiTrobat = new Cami(files * columnes);
         laberint.setNodes(0);
 
-        // Implementa l'algoritme aquí
-        camiTrobat.afegeix(desti);
+        // Get "city" array
+        ArrayList<Punt> city = new ArrayList<>();
+        try{
+            for (int i = 0; i < Integer.MAX_VALUE; i++){
+                city.add(laberint.getObjecte(i));
+            }
+        }catch(Exception e){
+        }
 
-        return camiTrobat;
+        ArrayList<Boolean> visited = new ArrayList<>();
+        for (int i = 0; i < city.size(); i++){ // add as much "cities" as we have
+            visited.add(false);
+        }
+
+        return invert_path(TSM_recursive(origen, desti, camiTrobat, Integer.MAX_VALUE, visited));
     }
 }
