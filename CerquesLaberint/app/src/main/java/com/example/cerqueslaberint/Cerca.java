@@ -148,6 +148,7 @@ public class Cerca {
                 if (calculaF(auxTarget, desti, tipus) > calculaF(auxToAdd, desti, tipus)) {
                     target.remove(j);
                     target.add(auxToAdd);
+                    toAdd.remove(i);
                 }
             }
         }
@@ -168,16 +169,28 @@ public class Cerca {
             if (laberint.pucAnar(node.x, node.y, orden[i])) {
                 switch (orden[i]) {
                     case Laberint.ESQUERRA:
-                        expansion.add(new Punt(node.x, node.y - 1, node, 0));
+                        //System.out.println("Puedo ir a la izquierda");
+                        Punt auxEsq = new Punt(node.x, node.y - 1, node, 0);
+                        auxEsq.distanciaDeLinici = node.distanciaDeLinici;
+                        expansion.add(auxEsq);
                         break;
                     case Laberint.AMUNT:
-                        expansion.add(new Punt(node.x - 1, node.y, node, 0));
+                        //System.out.println("Puedo ir a la arriba");
+                        Punt auxAmunt = new Punt(node.x - 1, node.y, node, 0);
+                        auxAmunt.distanciaDeLinici = node.distanciaDeLinici;
+                        expansion.add(auxAmunt);
                         break;
                     case Laberint.DRETA:
-                        expansion.add(new Punt(node.x, node.y + 1, node, 0));
+                        //System.out.println("Puedo ir a la derecha");
+                        Punt auxDreta = new Punt(node.x, node.y + 1, node, 0);
+                        auxDreta.distanciaDeLinici = node.distanciaDeLinici;
+                        expansion.add(auxDreta);
                         break;
                     case Laberint.AVALL:
-                        expansion.add(new Punt(node.x + 1, node.y, node, 0));
+                        //System.out.println("Puedo ir a la abajo");
+                        Punt auxAvall = new Punt(node.x + 1, node.y, node, 0);
+                        auxAvall.distanciaDeLinici = node.distanciaDeLinici;
+                        expansion.add(auxAvall);
                         break;
                     default:
                         return null;
@@ -217,8 +230,12 @@ public class Cerca {
      */
     private double calculaF(Punt origen, Punt desti, int tipus) {
         if (tipus == 2) {
+            print_punt(origen);
+            print_punt(desti);
             origen.distanciaAlFinal = calculaManhattan(origen, desti);
         } else {
+            print_punt(origen);
+            print_punt(desti);
             origen.distanciaAlFinal = calculaEuclidea(origen, desti);
         }
 
@@ -336,7 +353,7 @@ public class Cerca {
 
         Cami camiTrobat = new Cami(files * columnes);
         laberint.setNodes(0);
-        boolean found = false;
+        boolean found;
         Punt current_punt = origen;
 
         current_punt.distanciaDeLinici = 0;
@@ -347,7 +364,7 @@ public class Cerca {
         while (open.size() != 0) {
             found = false;
             Punt node = getLeast(open, desti, tipus); // Point with least f(n)
-            open.remove(0);
+            open.remove(node);
 
             int i;
             for (i = 0; i < closed.size(); i++) {
