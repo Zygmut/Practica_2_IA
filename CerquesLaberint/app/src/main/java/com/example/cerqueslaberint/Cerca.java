@@ -11,7 +11,7 @@ import java.util.Stack;
  */
 
 /**
- * AUTORS:__________________________________________
+ * AUTORS:Kieran Donal Orr, Rubén Palmer Perez i Marc Torres Torres
  */
 /* S'ha d'omplenar la següent taula amb els diferents valors del nodes visitats i la llargada del camí
  * per les diferents grandàries de laberints proposades i comentar breument els resultats obtinguts.
@@ -19,14 +19,32 @@ import java.util.Stack;
  *                  Profunditat           Amplada          Manhattan         Euclidiana         Viatjant        *
  *  Laberint     Nodes   Llargada    Nodes   Llargada   Nodes   Llargada   Nodes   Llargada  Nodes   Llargada   *
  * **************************************************************************************************************
- *    Petit
- *    Mitjà
- *    Gran
+ *    Petit        52      32         241      15       32         15       35        14    21200       54
+ *    Mitjà        202     96         2318     32       136        32       177       32    191483      127
+ *    Gran         304     165        17780    96       499        96       532       96    819260      272
  *
  * Comentari sobre els resultats obtinguts:
+ * Abans de començar cal dir que totes les dades es varen treure apartir de 10 experiments a cada nivell i per cada
+ * algorisme per un total de 120 experiments. Per veure els resultats dels 120 experiments pots utilizar aquest enllaç
+ * https://docs.google.com/spreadsheets/d/1RPaolvkbocNd0nTmprcEzVTWdXCFpsA09wXPmT5tSlo/edit?usp=sharing
  *
+ * Podem veure que els resultats son els esperats:
+ * -Primer tenim el de Profunditat vs Amplada podem veure que la de profunditat visita menys que amplada nodes pero la
+ *  seva solució es pitjor casi sempre. Aixo seria el resultat esperat
+ * -Llavors podem veure que tant el Manhattan com Euclidia visiten menys nodes, aixo era de espera ja que les dos no
+ *  cerquen de forma tan aleatori com el de profunditat o amplada sinó que fan calculs mitjançant el destí per averiguar la
+ *  millor opció
+ * -El manhattan y euclidiana presenten la mateixa llargari a tots el nivells pero aixó només es la mitjana
+ *  en els experiments a vegades donaven diferent per un o dos de llargari, aixo tambe era de esperar
+ * -Per el viatjant cal explicar perque la quantitat de nodes es tan gran, noltros per resoldre el problema voliem
+ *  trobar el millor camí possible per tant hem aplicat un mètode de brut force. Això voldria dir que en un principi
+ *  fariem tots els camins possibles i ens quedariem amb el millor. Pero això sobretot amb laberints grans seria un
+ *  abús de la CPU per tant el que varem decidir era fer podes, ho hem fet podant les branques que son mes grans
+ *  que el actual cami complet mes petit. Fent aquestes podes podem reduir significativament la quantitat de nodes
+ *  visitats
  *
- *
+ * Tambe hem fetr una documentacio que pots accedir amb aquest enllaç:
+ * https://drive.google.com/file/d/1UzFiVB_AeT26Vp2Cjutdvh7UKkhjjGrS/view?usp=sharing
  *
  *
  *
